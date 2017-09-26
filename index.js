@@ -22,8 +22,8 @@ const schema = Joi.array().min(1).items(Joi.object().keys(
 
 const providers = [
   { name: 'Brave Software International',
-    site: 'https://ledger-staging.brave.com',
-    server: 'https://ledger-staging.brave.com',
+    site: 'https://ledger-staging.mercury.basicattentiontoken.org',
+    server: 'https://ledger-staging.mercury.basicattentiontoken.org',
     path: "'/v2/address/BAT/' + address + '/balance'",
     confirmed: 'parseFloat(body.balance)',
     unconfirmed: 'parseFloat(body.unconfirmed)'
