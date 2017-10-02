@@ -22,15 +22,15 @@ const schema = Joi.array().min(1).items(Joi.object().keys(
 
 const providers = [
   { name: 'Brave Software International',
-    site: 'https://ledger-staging.mercury.basicattentiontoken.org',
-    server: 'https://ledger-staging.mercury.basicattentiontoken.org',
-    path: "'/v2/address/BAT/' + address + '/balance'",
+    site: 'https://balance-staging.mercury.basicattentiontoken.org',
+    server: 'https://balance-staging.mercury.basicattentiontoken.org',
+    path: "'/v2/card/BAT/' + paymentId + '/balance'",
     confirmed: 'parseFloat(body.balance)',
     unconfirmed: 'parseFloat(body.unconfirmed)'
   }
 ]
 
-const getBalance = (address, options, callback) => {
+const getBalance = (params, options, callback) => {
   let entries, services, testnetP
 
   if (typeof options === 'function') {
@@ -40,14 +40,16 @@ const getBalance = (address, options, callback) => {
   options = underscore.extend({ roundtrip: roundTrip }, options)
   if (typeof options.roundtrip !== 'function') throw new Error('invalid roundtrip option (must be a function)')
 
-  testnetP = testnetAddressP(address)
+  if (typeof params === 'string') params = { address: params }
+
+  if (params.address) testnetP = testnetAddressP(params.address)
   services = testnetP ? providers.filter((provider) => { return provider.testnetP }) : providers
 
   services.forEach((provider) => { if (typeof provider.score === 'undefined') provider.score = 0 })
   entries = underscore.sortBy(underscore.shuffle(services), (provider) => { return provider.score })
 
   const e = (provider, field) => {
-    const result = datax.evaluate(provider[field], { address: address, testnetP: testnetP })
+    const result = datax.evaluate(provider[field], underscore.defaults(params, { testnetP: testnetP }))
 
     if (result) return result
 
