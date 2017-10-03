@@ -30,6 +30,8 @@ const providers = [
   }
 ]
 
+const uuidV4RegExp = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i
+
 const getBalance = (params, options, callback) => {
   let entries, services, testnetP
 
@@ -40,7 +42,10 @@ const getBalance = (params, options, callback) => {
   options = underscore.extend({ roundtrip: roundTrip }, options)
   if (typeof options.roundtrip !== 'function') throw new Error('invalid roundtrip option (must be a function)')
 
-  if (typeof params === 'string') params = { address: params }
+  if (typeof params === 'string') {
+    if (uuidV4RegExp.test(params)) params = { paymentId: params }
+    else params = { address: params }
+  }
 
   if (params.address) testnetP = testnetAddressP(params.address)
   services = testnetP ? providers.filter((provider) => { return provider.testnetP }) : providers
