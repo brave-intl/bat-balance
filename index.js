@@ -24,7 +24,7 @@ const providers = [
   { name: 'Brave Software International',
     site: 'https://balance-staging.mercury.basicattentiontoken.org',
     server: 'https://balance-staging.mercury.basicattentiontoken.org',
-    path: "'/v2/card/BAT/' + paymentId + '/balance'",
+    path: "'/v2/card/BAT/' + addresses.CARD_ID + '/balance'",
     confirmed: 'parseFloat(body.balance)',
     unconfirmed: 'parseFloat(body.unconfirmed)'
   }
@@ -43,8 +43,8 @@ const getBalance = (params, options, callback) => {
   if (typeof options.roundtrip !== 'function') throw new Error('invalid roundtrip option (must be a function)')
 
   if (typeof params === 'string') {
-    if (uuidV4RegExp.test(params)) params = { paymentId: params }
-    else params = { address: params }
+    if (uuidV4RegExp.test(params)) params = { addresses: { CARD_ID: params } }
+    else params = { addresses: { BAT: params } }
   }
 
   if (params.address) testnetP = testnetAddressP(params.address)
