@@ -39,8 +39,11 @@ const getBalance = (params, options, callback) => {
     callback = options
     options = {}
   }
-  options = underscore.extend({ roundtrip: roundTrip }, options)
-  if (typeof options.roundtrip !== 'function') throw new Error('invalid roundtrip option (must be a function)')
+
+  if (typeof options.roundtrip !== 'undefined') {
+    if (typeof options.roundtrip !== 'function') throw new Error('invalid roundtrip option (must be a function)')
+  } else if (options.debugP) options.roundtrip = roundTrip
+  else throw new Error('security audit requires options.roundtrip for non-debug use')
 
   if (typeof params === 'string') {
     if (uuidV4RegExp.test(params)) params = { addresses: { CARD_ID: params } }
