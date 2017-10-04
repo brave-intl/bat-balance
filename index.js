@@ -33,6 +33,37 @@ const providers = [
 const uuidV4RegExp = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 const getBalance = (params, options, callback) => {
+  getProperties(params, options, (err, provider, payload, now) => {
+    let result
+
+    if (err) return callback(err, provider, payload)
+
+    result = datax.evaluate(provider.confirmed, { body: payload })
+    if (typeof result === 'number') {
+      provider.score = Math.max(5000 - (underscore.now() - now), -250)
+      if ((options.balancesP) && (provider.unconfirmed)) {
+        try {
+          result = { balance: result, unconfirmed: datax.evaluate(provider.unconfirmed, { body: payload }) }
+        } catch (ex) {
+          if ((options.debugP) || (options.verboseP)) {
+            console.log('provider ' + provider.name + ' has invalid confirmed field [' + provider.confirmed + ']/1 for ' +
+                      JSON.stringify(payload))
+          }
+        }
+      }
+      callback(null, provider, result)
+      if (options.allP) throw new Error('')
+
+      return
+    }
+
+    provider.score = -1001
+    throw new Error('provider ' + provider.name + ' has invalid confirmed field [' + provider.confirmed + ']/2 for ' +
+                    JSON.stringify(payload))
+  })
+}
+
+const getProperties = (params, options, callback) => {
   let entries, services, testnetP
 
   if (typeof options === 'function') {
@@ -89,38 +120,15 @@ const getBalance = (params, options, callback) => {
 
     now = underscore.now()
     options.roundtrip(params, options, (err, response, payload) => {
-      let result
-
       if (err) {
         provider.score = (err.toString() === 'Error: timeout') ? -500  // timeout
                            : (typeof err.code !== 'undefined') ? -350  // DNS, etc.
                            : -750                                      // HTTP response error
       } else {
-        result = datax.evaluate(provider.confirmed, { body: payload })
-        if (typeof result === 'number') {
-          provider.score = Math.max(5000 - (underscore.now() - now), -250)
-          if ((options.balancesP) && (provider.unconfirmed)) {
-            try {
-              result = { balance: result, unconfirmed: datax.evaluate(provider.unconfirmed, { body: payload }) }
-            } catch (ex) {
-              if ((options.debugP) || (options.verboseP)) {
-                console.log('provider ' + provider.name + ' has invalid confirmed field [' + provider.confirmed + ']/1 for ' +
-                          JSON.stringify(payload))
-              }
-            }
-          }
-          callback(null, provider, result)
-          if (options.allP) return f(i)
-
-          return
-        }
-
-        err = new Error('provider ' + provider.name + ' has invalid confirmed field [' + provider.confirmed + ']/2 for ' +
-                        JSON.stringify(payload))
-        provider.score = -1001
+        try { return callback(null, provider, payload, now) } catch (ex) { err = ex }
       }
 
-      callback(new BalanceError(err, provider.name), provider)
+      if (err.message !== '') callback(new BalanceError(err, provider.name), provider)
       f(i)
     })
   }
@@ -196,6 +204,7 @@ const testnetAddressP = (address) => { return false }
 
 module.exports = {
   getBalance: getBalance,
+  getProperties: getProperties,
   providers: providers,
   schema: schema,
   testnetAddressP: testnetAddressP
