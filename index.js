@@ -22,8 +22,8 @@ const schema = Joi.array().min(1).items(Joi.object().keys(
 
 const providers = [
   { name: 'Brave Software International',
-    site: 'https://balance-staging.mercury.basicattentiontoken.org',
-    server: 'https://balance-staging.mercury.basicattentiontoken.org',
+    site: 'https://balance.mercury.basicattentiontoken.org',
+    server: 'https://balance.mercury.basicattentiontoken.org',
     path: "'/v2/card/BAT/' + addresses.CARD_ID + '/balance'",
     confirmed: 'parseFloat(body.balance)',
     unconfirmed: 'parseFloat(body.unconfirmed)'

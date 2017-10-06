@@ -1,6 +1,6 @@
 {
   "name": "bat-balance",
-  "version": "0.9.9",
+  "version": "1.0.0",
   "description": "Find the balance associated with a BAT wallet.",
   "main": "index.js",
   "scripts": {
