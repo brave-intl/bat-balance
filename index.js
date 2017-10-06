@@ -162,12 +162,14 @@ const roundTrip = (params, options, callback) => {
         console.log('>>> via: ' + params.hostname + (params.path || ''))
         console.log('>>> ' + (body || '').split('\n').join('\n>>> '))
       }
-      if (Math.floor(response.statusCode / 100) !== 2) return callback(new Error('HTTP response ' + response.statusCode))
+      if (Math.floor(response.statusCode / 100) !== 2) {
+        return callback(new Error('HTTP response ' + response.statusCode), response)
+      }
 
       try {
         payload = (response.statusCode !== 204) ? JSON.parse(body) : null
       } catch (err) {
-        return callback(new BalanceError(err, url.format(params)))
+        return callback(new BalanceError(err, url.format(params)), response)
       }
 
       try {
