@@ -1,6 +1,6 @@
 {
   "name": "bat-balance",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Find the balance associated with a BAT wallet.",
   "main": "index.js",
   "scripts": {
@@ -24,8 +24,8 @@
     "underscore": "1.8.3"
   },
   "engines": {
-    "node": "7.10.1",
-    "npm": "4.2.0"
+    "node": ">=7.10.1",
+    "npm": ">=4.2.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.0.1",
