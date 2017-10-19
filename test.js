@@ -3,6 +3,7 @@ var params = [
 ]
 var ledgerBalance = require('.')
 
+/*
 params.forEach((params) => {
   ledgerBalance.getBalance(params, { allP: true, debugP: true, verboseP: true, timeout: 5000 }, (err, provider, result) => {
     if (err) {
@@ -14,6 +15,7 @@ params.forEach((params) => {
                 JSON.stringify(result, null, 2))
   })
 })
+ */
 
 params.forEach((params) => {
   ledgerBalance.getProperties(params, { allP: true, debugP: true, verboseP: true, timeout: 5000 }, (err, provider, result) => {

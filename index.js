@@ -2,6 +2,7 @@ const http = require('http')
 const https = require('https')
 const url = require('url')
 
+const backoff = require('@ambassify/backoff-strategies')
 const datax = require('data-expression')
 const Joi = require('joi')
 const underscore = require('underscore')
@@ -119,7 +120,7 @@ const getProperties = (params, options, callback) => {
     }
 
     now = underscore.now()
-    options.roundtrip(params, options, (err, response, payload) => {
+    retryTrip(params, options, (err, response, payload) => {
       if (err) {
         provider.score = (err.toString() === 'Error: timeout') ? -500  // timeout
                            : (typeof err.code !== 'undefined') ? -350  // DNS, etc.
@@ -134,6 +135,33 @@ const getProperties = (params, options, callback) => {
   }
 
   f(entries.length)
+}
+
+const retryTrip = (params, options, callback, retry) => {
+  let method
+
+  const loser = (reason) => { setTimeout(() => { callback(new Error(reason)) }, 0) }
+  const rangeP = (n, min, max) => { return ((min <= n) && (n <= max) && (n === parseInt(n, 10))) }
+
+  if (!retry) {
+    retry = underscore.defaults(options.backoff || {}, {
+      algorithm: 'binaryExponential', delay: 5 * 1000, retries: 3, tries: 0
+    })
+    if (!rangeP(retry.delay, 1, 30 * 1000)) return loser('invalid backoff delay')
+    if (!rangeP(retry.retries, 0, 10)) return loser('invalid backoff retries')
+    if (!rangeP(retry.tries, 0, retry.retries - 1)) return loser('invalid backoff tries')
+  }
+  method = retry.method || backoff[retry.algorithm]
+  if (typeof method !== 'function') return loser('invalid backoff algorithm')
+  method = method(retry.delay)
+
+  options.roundtrip(params, options, (err, response, payload) => {
+    const code = Math.floor(response.statusCode / 100)
+
+    if ((!err) || (code !== 5) || (retry.retries-- < 0)) return callback(err, response, payload)
+
+    return setTimeout(() => { retryTrip(params, options, callback, retry) }, method(++retry.tries))
+  })
 }
 
 const roundTrip = (params, options, callback) => {
