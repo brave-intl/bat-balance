@@ -6,6 +6,7 @@ const backoff = require('@ambassify/backoff-strategies')
 const datax = require('data-expression')
 const Joi = require('joi')
 const underscore = require('underscore')
+const npminfo = require('./package.json')
 
 const schema = Joi.array().min(1).items(Joi.object().keys(
   { name: Joi.string().required().description('commonly-known name of provider'),
@@ -237,7 +238,8 @@ module.exports = {
   getProperties: getProperties,
   providers: providers,
   schema: schema,
-  testnetAddressP: testnetAddressP
+  testnetAddressP: testnetAddressP,
+  version: npminfo.version
 }
 
 const validity = Joi.validate(providers, schema)
