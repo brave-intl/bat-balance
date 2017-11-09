@@ -17,16 +17,25 @@ const schema = Joi.array().min(1).items(Joi.object().keys(
     payload: Joi.string().optional().description('expression to evaluate for HTTP payload'),
     confirmed: Joi.string().required().description('expression to evaluate to resolve to satoshis'),
     unconfirmed: Joi.string().optional().description('expression to evaluate to resolve to satoshis'),
-    testnetP: Joi.boolean().optional().description('supports testnet addresses'),
-    description: Joi.string().optional().description('a brief annotation')
+    description: Joi.string().optional().description('a brief annotation'),
+    environment: Joi.string().valid('production', 'staging').required().description('the environment')
   }
 ))
 
 const providers = [
   { name: 'Brave Software International',
+    environment: 'production',
     site: 'https://balance.mercury.basicattentiontoken.org',
     server: 'https://balance.mercury.basicattentiontoken.org',
-    path: "'/v2/card/BAT/' + addresses.CARD_ID + '/balance'",
+    path: "'/v2/wallet/' + paymentId + '/balance'",
+    confirmed: 'parseFloat(body.balance)',
+    unconfirmed: 'parseFloat(body.unconfirmed)'
+  },
+  { name: 'Brave Software International Staging',
+    environment: 'staging',
+    site: 'https://balance-staging.mercury.basicattentiontoken.org',
+    server: 'https://balance-staging.mercury.basicattentiontoken.org',
+    path: "'/v2/wallet/' + paymentId + '/balance'",
     confirmed: 'parseFloat(body.balance)',
     unconfirmed: 'parseFloat(body.unconfirmed)'
   }
@@ -66,7 +75,7 @@ const getBalance = (params, options, callback) => {
 }
 
 const getProperties = (params, options, callback) => {
-  let entries, services, testnetP
+  let entries, services
 
   if (typeof options === 'function') {
     callback = options
@@ -83,14 +92,13 @@ const getProperties = (params, options, callback) => {
     else params = { addresses: { BAT: params } }
   }
 
-  if (params.address) testnetP = testnetAddressP(params.address)
-  services = testnetP ? providers.filter((provider) => { return provider.testnetP }) : providers
+  services = providers.filter((provider) => { return provider.environment === (options.environment || 'production') })
 
   services.forEach((provider) => { if (typeof provider.score === 'undefined') provider.score = 0 })
   entries = underscore.sortBy(underscore.shuffle(services), (provider) => { return provider.score })
 
   const e = (provider, field) => {
-    const result = datax.evaluate(provider[field], underscore.defaults(params, { testnetP: testnetP }))
+    const result = datax.evaluate(provider[field], underscore.defaults(params))
 
     if (result) return result
 
@@ -231,14 +239,11 @@ const BalanceError = function (err, name) {
   this.message = name + ': ' + underscore.message
 }
 
-const testnetAddressP = (address) => { return false }
-
 module.exports = {
   getBalance: getBalance,
   getProperties: getProperties,
   providers: providers,
   schema: schema,
-  testnetAddressP: testnetAddressP,
   version: npminfo.version
 }
 
