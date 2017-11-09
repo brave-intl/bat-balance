@@ -18,7 +18,7 @@ params.forEach((params) => {
  */
 
 params.forEach((params) => {
-  ledgerBalance.getProperties(params, { allP: true, debugP: true, verboseP: true, timeout: 5000 }, (err, provider, result) => {
+  ledgerBalance.getProperties(params, { environment: 'staging', allP: true, debugP: true, verboseP: true, timeout: 5000 }, (err, provider, result) => {
     if (err) {
       return console.log('params=' + console.log(params) + ' provider=' + (provider || {}).name + ' ' +
                          ' error=' + JSON.stringify(err, null, 2))
