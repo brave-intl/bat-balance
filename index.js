@@ -27,7 +27,7 @@ const providers = [
     environment: 'production',
     site: 'https://balance.mercury.basicattentiontoken.org',
     server: 'https://balance.mercury.basicattentiontoken.org',
-    path: "'/v2/card/BAT/' + addresses.CARD_ID + '/balance'",
+    path: "'/v2/wallet/' + paymentId + '/balance'",
     confirmed: 'parseFloat(body.balance)',
     unconfirmed: 'parseFloat(body.unconfirmed)'
   },
@@ -35,7 +35,7 @@ const providers = [
     environment: 'staging',
     site: 'https://balance-staging.mercury.basicattentiontoken.org',
     server: 'https://balance-staging.mercury.basicattentiontoken.org',
-    path: "'/v2/card/BAT/' + addresses.CARD_ID + '/balance'",
+    path: "'/v2/wallet/' + paymentId + '/balance'",
     confirmed: 'parseFloat(body.balance)',
     unconfirmed: 'parseFloat(body.unconfirmed)'
   }

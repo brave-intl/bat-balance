@@ -1,5 +1,5 @@
 var params = [
-  'ddaa35e6-d86c-49ab-ba42-3b894b54b198'
+  {'paymentId': '92d10ea7-420a-4af7-9a4c-cfe2512b9cad'}
 ]
 var ledgerBalance = require('.')
 
