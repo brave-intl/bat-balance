@@ -11,7 +11,7 @@ const npminfo = require('./package.json')
 const schema = Joi.array().min(1).items(Joi.object().keys(
   { name: Joi.string().required().description('commonly-known name of provider'),
     site: Joi.string().uri().required().description('associated website'),
-    server: Joi.string().uri({ schema: /https?/ }).required().description('HTTP(s) location of service'),
+    server: Joi.string().uri({ scheme: /https?/ }).required().description('HTTP(s) location of service'),
     path: Joi.string().required().description('path to evaluate for endpoint'),
     method: Joi.string().valid('GET', 'POST', 'PUT').optional().description('HTTP method'),
     payload: Joi.string().optional().description('expression to evaluate for HTTP payload'),
